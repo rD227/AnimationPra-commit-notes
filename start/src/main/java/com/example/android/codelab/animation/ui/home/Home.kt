@@ -130,6 +130,8 @@ import androidx.compose.ui.unit.sp
 import com.example.android.codelab.animation.R
 import com.example.android.codelab.animation.ui.Amber600
 import com.example.android.codelab.animation.ui.AnimationCodelabTheme
+import com.example.android.codelab.animation.ui.DarkGreen
+import com.example.android.codelab.animation.ui.DarkPink
 import com.example.android.codelab.animation.ui.Green
 import com.example.android.codelab.animation.ui.GreenLight
 import com.example.android.codelab.animation.ui.PaleDogwood
@@ -327,8 +329,9 @@ private fun HomeFloatingActionButton(
                         dampingRatio = Spring.DampingRatioMediumBouncy
                     )
                 ) + expandHorizontally(
-                    animationSpec = spring(Spring.DampingRatioMediumBouncy,
-                        Spring.StiffnessLow
+                    animationSpec = spring(
+                        stiffness = Spring.StiffnessLow,
+                        dampingRatio = Spring.DampingRatioMediumBouncy
                     )
                 ) + fadeIn(),
                 exit = slideOutVertically(targetOffsetY = { 40 }) + shrinkHorizontally() + fadeOut()
@@ -353,11 +356,7 @@ private fun EditMessage(shown: Boolean) {
         visible = shown,
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> -fullHeight },
-            animationSpec = spring (
-                stiffness = Spring.StiffnessLow,
-                dampingRatio = Spring.DampingRatioMediumBouncy
-            ),
-
+            animationSpec = mySpringSpec()
         ),
         exit = slideOutVertically(
             targetOffsetY = { fullHeight -> -fullHeight },
@@ -518,15 +517,41 @@ private fun HomeTabBar(
  * @param tabPositions The list of [TabPosition]s from a [TabRow].
  * @param tabPage The [TabPage] that is currently selected.
  */
+
+
+fun <T> mySpringSpec ()
+    = spring<T>(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessLow
+    )
+/*val mySpring = spring/*<IntOffset>*/(stiffness = Spring.StiffnessLow,
+    dampingRatio = Spring.DampingRatioMediumBouncy
+)
+*/
+
 @Composable
 private fun HomeTabIndicator(
     tabPositions: List<TabPosition>,
     tabPage: TabPage
 ) {
     // TODO 4: Animate these value changes.
-    val indicatorLeft = tabPositions[tabPage.ordinal].left
-    val indicatorRight = tabPositions[tabPage.ordinal].right
-    val color = if (tabPage == TabPage.Home) PaleDogwood else Green
+    val transition = updateTransition(
+        tabPage, label = "tabPageTransition"
+    )
+    val indicatorLeft by transition.animateDp(
+        label = "indicatorLeft",
+        transitionSpec = { if (TabPage.Home isTransitioningTo TabPage.Work) mySpringSpec() else mySpringSpec() }
+    ) { page ->
+        tabPositions[page.ordinal].left
+    }
+    val indicatorRight by transition.animateDp(
+        label = "indicatorRight",
+        transitionSpec = { if (TabPage.Home isTransitioningTo TabPage.Work) mySpringSpec() else mySpringSpec() }
+    ) { page ->
+        tabPositions[page.ordinal].right
+    }
+
+    val color = if (tabPage == TabPage.Home) DarkPink else DarkGreen
     Box(
         Modifier
             .fillMaxSize()

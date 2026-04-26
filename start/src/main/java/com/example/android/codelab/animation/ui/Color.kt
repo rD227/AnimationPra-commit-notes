@@ -22,6 +22,10 @@ val Amber600 = Color(0xFFFFB300)
 
 val Melon = Color(0xFFfec5bb)
 val PaleDogwood = Color(0xFFfcd5ce)
+
+val DarkPink = Color(0xFFE3A0EE)
+
+val DarkGreen = Color(0xFF33691E)
 val Seashell = Color(0xFFf8edeb)
 val Peach = Color(0xFFfec89a)
 val Green = Color(0xFFd8e2dc)
