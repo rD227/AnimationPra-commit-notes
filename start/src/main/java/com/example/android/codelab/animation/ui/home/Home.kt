@@ -21,6 +21,7 @@ import androidx.compose.animation.animateColor
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
@@ -111,6 +112,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -360,7 +362,7 @@ private fun EditMessage(shown: Boolean) {
         ),
         exit = slideOutVertically(
             targetOffsetY = { fullHeight -> -fullHeight },
-            animationSpec = tween ( durationMillis = 250 , easing = FastOutLinearInEasing )
+            animationSpec = tween(durationMillis = 250, easing = FastOutLinearInEasing)
         )
     ) {
         Surface(
@@ -524,10 +526,6 @@ fun <T> mySpringSpec ()
         dampingRatio = Spring.DampingRatioMediumBouncy,
         stiffness = Spring.StiffnessLow
     )
-/*val mySpring = spring/*<IntOffset>*/(stiffness = Spring.StiffnessLow,
-    dampingRatio = Spring.DampingRatioMediumBouncy
-)
-*/
 
 @Composable
 private fun HomeTabIndicator(
@@ -636,26 +634,50 @@ private fun WeatherRow(
  */
 @Composable
 private fun LoadingRow() {
-    // TODO 5: Animate this value between 0f and 1f, then back to 0f repeatedly.
-    val alpha = 1f
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    
+    // 动画化从左到右的偏移量
+    val xOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmerOffset"
+    )
+
+    // 创建微光渐变画刷
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(
+            Color.LightGray.copy(alpha = 0.6f),
+            Color.LightGray.copy(alpha = 0.2f),
+            Color.LightGray.copy(alpha = 0.6f),
+        ),
+        start = Offset(xOffset - 300f, 0f),
+        end = Offset(xOffset, 0f)
+    )
+
     Row(
         modifier = Modifier
             .heightIn(min = 64.dp)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // 圆形微光
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(Color.LightGray.copy(alpha = alpha))
+                .background(shimmerBrush)
         )
         Spacer(modifier = Modifier.width(16.dp))
+        // 矩形条微光
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(32.dp)
-                .background(Color.LightGray.copy(alpha = alpha))
+                .background(shimmerBrush)
         )
     }
 }
